@@ -1,0 +1,51 @@
+name: publish-llvm-nuget-packages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Build and push NuGet packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLVM_RELEASE_TAG: "19.1.7"
+        run: python3 scripts/build_llvm_nuget.py
+
+      - name: Upload NuGet artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: llvm-nuget-packages
+          path: artifacts/*.nupkg
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Push NuGet packages
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          packages=(artifacts/*.nupkg)
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "No packages to push."
+            exit 0
+          fi
+          for pkg in "${packages[@]}"; do
+            echo "Pushing ${pkg}"
+            dotnet nuget push "${pkg}" --api-key "${NUGET_API_KEY}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done

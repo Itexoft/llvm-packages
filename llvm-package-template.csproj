@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.7.134">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <PackageContentPath>runtimes/$(PackageRid)/native/</PackageContentPath>
+    <Authors>Denis Kudelin</Authors>
+    <Description>LLVM component package.</Description>
+    <RepositoryUrl>https://github.com/Itexoft/llvm-packages.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Company>Itexoft</Company>
+    <Copyright>$(Authors)</Copyright>
+    <IconUrl>https://avatars.githubusercontent.com/u/17149993</IconUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(PackageContentDir)/**/*" Pack="true" PackagePath="$(PackageContentPath)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(PackageReadmePath)' != ''">
+    <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>
